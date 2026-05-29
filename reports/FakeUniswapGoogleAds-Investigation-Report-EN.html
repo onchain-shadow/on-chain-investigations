@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fake Uniswap Google Ads Phishing Scam Investigation Report - Onchain Shadow</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0a0a0a; color: #e0e0e0; line-height: 1.7; }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        header { border-bottom: 1px solid #1a1a1a; padding-bottom: 30px; margin-bottom: 40px; }
+        .back-link { color: #00ff88; text-decoration: none; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 5px; }
+        .back-link:hover { text-decoration: underline; }
+        h1 { color: #fff; font-size: 2rem; margin: 20px 0 10px; }
+        h2 { color: #00ff88; font-size: 1.4rem; margin: 40px 0 20px; padding-top: 20px; border-top: 1px solid #1a1a1a; }
+        h3 { color: #fff; font-size: 1.1rem; margin: 25px 0 15px; }
+        .meta { color: #666; font-size: 0.85rem; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 0.9rem; }
+        th, td { padding: 12px 15px; text-align: left; border: 1px solid #1a1a1a; }
+        th { background: #111; color: #00ff88; }
+        tr:nth-child(even) { background: #0d0d0d; }
+        code { background: #1a1a1a; padding: 2px 6px; border-radius: 3px; font-family: monospace; color: #00ff88; font-size: 0.85rem; }
+        pre { background: #111; padding: 20px; border-radius: 8px; overflow-x: auto; margin: 20px 0; border: 1px solid #1a1a1a; }
+        pre code { background: none; padding: 0; }
+        blockquote { border-left: 3px solid #00ff88; padding-left: 20px; margin: 20px 0; color: #888; font-style: italic; }
+        ul, ol { margin: 15px 0 15px 25px; }
+        li { margin-bottom: 8px; }
+        footer { text-align: center; padding: 40px 20px; margin-top: 60px; border-top: 1px solid #1a1a1a; color: #666; font-size: 0.85rem; }
+        footer a { color: #00ff88; text-decoration: none; }
+        footer a:hover { text-decoration: underline; }
+        hr { border: none; border-top: 1px solid #1a1a1a; margin: 30px 0; }
+        strong { color: #fff; }
+        .risk-critical { background: rgba(255, 0, 0, 0.3); color: #ff0000; padding: 2px 8px; border-radius: 3px; }
+        .risk-high { background: rgba(255, 68, 68, 0.2); color: #ff4444; padding: 2px 8px; border-radius: 3px; }
+        .risk-medium { background: rgba(255, 193, 7, 0.2); color: #ffc107; padding: 2px 8px; border-radius: 3px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <a href="../index.html" class="back-link">← Back to Reports</a>
+<h1>Fake Uniswap Google Ads Phishing Scam Investigation Report</h1>
+<p><strong>Investigation Date</strong>: May 26, 2026<br />
+<strong>Event Type</strong>: Google Ads Phishing Scam<br />
+<strong>Loss Amount</strong>: $400,000+<br />
+<strong>Attacker Wallets</strong>: 
+- <code>0x37925684BA178821b4436E06e67f5dBD6cfA49Bb</code>
+- <code>0x2fC25F46cCC49D226eF92E9A7665f3d2821F3c5E2</code></p>
+<hr />
+<h2>📋 Event Overview</h2>
+<p>On May 25, 2026, on-chain analyst b_block discovered attackers purchased Google sponsored ads to impersonate the official Uniswap website, inducing users to connect wallets and sign malicious transactions, thereby stealing user assets.</p>
+<p>As of the report, the two attacker wallets hold approximately 146 ETH (valued ~$306,000 at the time), with total losses exceeding $400,000.</p>
+<hr />
+<h2>🔍 Attack Method Analysis</h2>
+<h3>Attack Flow</h3>
+<ol>
+<li><strong>Ad Placement</strong>: Attackers purchased "Uniswap" keyword sponsored ads on Google search platform</li>
+<li><strong>Phishing Website</strong>: Users clicking ads were directed to a meticulously designed phishing website, nearly identical to the official site</li>
+<li><strong>Malicious Authorization</strong>: When users connected wallets and signed transactions, they actually authorized malicious contract access</li>
+<li><strong>Fund Transfer</strong>: Drainer contract automatically transferred user assets to attacker-controlled wallets</li>
+</ol>
+<h3>Attack Tools</h3>
+<p>Security researchers identified the phishing website used the <strong>AngelFerno drainer</strong> tool, a "Phishing-as-a-Service" malware.</p>
+<p>Attackers also employed the following techniques to evade detection:
+- <strong>Punycode URL</strong>: Using Cyrillic letters to make phishing domain visually indistinguishable from legitimate domain
+- <strong>Hidden iframe</strong>: Loads malicious code invisible to Google's automated review system
+- <strong>Traffic Redirection</strong>: All user network traffic secretly routed to attacker-controlled servers</p>
+<h3>Attacker Infrastructure</h3>
+<ul>
+<li>Phishing websites used Google trusted services (sites.google.com, docs.google.com) to bypass detection</li>
+<li>Advanced infrastructure including Cloudflare Workers, Arweave hosting payloads, and proxy layers</li>
+<li>Can intercept Ethereum RPC requests and monitor user activity in real-time</li>
+</ul>
+<hr />
+<h2>📊 Fund Flow Analysis</h2>
+<table>
+<thead>
+<tr>
+<th>Wallet Address</th>
+<th>Holdings</th>
+<th>Estimated Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0x37925684...A49Bb</td>
+<td>~73 ETH + tokens</td>
+<td>~$153,000</td>
+</tr>
+<tr>
+<td>0x2fC25F46c...c5E2</td>
+<td>~73 ETH + tokens</td>
+<td>~$153,000</td>
+</tr>
+<tr>
+<td><strong>Total</strong></td>
+<td><strong>~146 ETH</strong></td>
+<td><strong>~$306,000</strong></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>⚠️ Systemic Risk Analysis</h2>
+<h3>Google Ads Platform Responsibility</h3>
+<p>According to the Security Alliance (SEAL) report:
+- During March 2026, Google Ads phishing attacks stole approximately <strong>$1.27 million</strong>
+- SEAL blocks over <strong>356</strong> malicious Google ad links weekly
+- This attack pattern has persisted for over <strong>one year</strong> with no signs of slowing</p>
+<h3>Notable Victims</h3>
+<p>Uniswap founder Hayden Adams has publicly criticized Google multiple times for failing to effectively combat counterfeit ads:</p>
+<blockquote>
+<p>"These scams are terrible. We've been fighting them for years. Fake apps impersonating Uniswap keep appearing, even though we've been applying to the Apple App Store and waiting months for approval."</p>
+</blockquote>
+<h3>FBI Data</h3>
+<p>According to FBI's "2025 Internet Crime Report":
+- Cryptocurrency-related complaints: <strong>181,565</strong>
+- Total losses: <strong>$11.36 billion</strong> (22% year-over-year increase)
+- Average loss per victim: <strong>$62,604</strong></p>
+<hr />
+<h2>🛡️ Community Protection Recommendations</h2>
+<ol>
+<li><strong>Bookmark URLs</strong>: Manually bookmark DeFi platform URLs instead of relying on search</li>
+<li><strong>Manual URL Entry</strong>: Enter official domains directly in browser</li>
+<li><strong>Verify Through Trusted Aggregators</strong>: Verify protocol information through trusted aggregators like DeFiLlama</li>
+<li><strong>Regular Authorization Revocation</strong>: Use revoke.cash to regularly clean up unnecessary token authorizations</li>
+<li><strong>Hardware Wallet</strong>: Use hardware wallets and carefully review each transaction</li>
+<li><strong>Ad Blocking</strong>: Consider using ad-blocking plugins and anti-phishing browser extensions</li>
+</ol>
+<hr />
+<h2>📝 Unique Analysis Perspective</h2>
+<p>This case reveals the <strong>contradiction between centralized platforms and decentralized finance</strong>:</p>
+<ul>
+<li><strong>DeFi protocols themselves are secure</strong>: Uniswap smart contracts have never been hacked</li>
+<li><strong>The problem is at the entry point</strong>: Google search results have become accomplices for attackers</li>
+<li><strong>Irreversibility</strong>: Blockchain transactions cannot be reversed; once malicious transactions are signed, funds cannot be recovered</li>
+</ul>
+<p>This differs from traditional cybersecurity—users cannot "call customer service" or "request a refund"; they can only rely on prevention rather than remediation.</p>
+<hr />
+<h2>📚 Data Sources</h2>
+<ul>
+<li><a href="https://x.com/b_block_oficial/status/2058874189164040664">b_block Initial Alert</a></li>
+<li><a href="https://x.com/stacy_muur/status/2058889644935442468">Stacy Muur Warning</a></li>
+<li><a href="https://radar.securityalliance.org/malicious-google-ads-targeting-crypto/">SEAL Malicious Google Ads Report</a></li>
+<li><a href="https://www.coindesk.cc/scammers-steal-over-400k-through-fake-uniswap-ads-on-google-search-53675.html">CoinDesk Report</a></li>
+<li><a href="https://beincrypto.com/fake-uniswap-drainer-400k-phishing/">BeInCrypto Report</a></li>
+</ul>
+<hr />
+<p><strong>Investigator</strong>: Onchain Shadow<br />
+<strong>OPSEC Statement</strong>: This report is based on publicly available on-chain data and media reports, all information from public sources.</p>
+    </div>
+    <footer>
+        <p><strong>Onchain Shadow</strong> — Independent On-Chain Investigator</p>
+        <p style="margin-top: 10px;">Reports are for research and educational purposes only.</p>
+    </footer>
+</body>
+</html>
