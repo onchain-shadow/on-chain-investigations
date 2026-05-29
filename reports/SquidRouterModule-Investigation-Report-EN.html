@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SquidRouterModule Safe Wallet Vulnerability Investigation Report - Onchain Shadow</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0a0a0a; color: #e0e0e0; line-height: 1.7; }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        header { border-bottom: 1px solid #1a1a1a; padding-bottom: 30px; margin-bottom: 40px; }
+        .back-link { color: #00ff88; text-decoration: none; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 5px; }
+        .back-link:hover { text-decoration: underline; }
+        h1 { color: #fff; font-size: 2rem; margin: 20px 0 10px; }
+        h2 { color: #00ff88; font-size: 1.4rem; margin: 40px 0 20px; padding-top: 20px; border-top: 1px solid #1a1a1a; }
+        h3 { color: #fff; font-size: 1.1rem; margin: 25px 0 15px; }
+        .meta { color: #666; font-size: 0.85rem; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 0.9rem; }
+        th, td { padding: 12px 15px; text-align: left; border: 1px solid #1a1a1a; }
+        th { background: #111; color: #00ff88; }
+        tr:nth-child(even) { background: #0d0d0d; }
+        code { background: #1a1a1a; padding: 2px 6px; border-radius: 3px; font-family: monospace; color: #00ff88; font-size: 0.85rem; }
+        pre { background: #111; padding: 20px; border-radius: 8px; overflow-x: auto; margin: 20px 0; border: 1px solid #1a1a1a; }
+        pre code { background: none; padding: 0; }
+        blockquote { border-left: 3px solid #00ff88; padding-left: 20px; margin: 20px 0; color: #888; font-style: italic; }
+        ul, ol { margin: 15px 0 15px 25px; }
+        li { margin-bottom: 8px; }
+        footer { text-align: center; padding: 40px 20px; margin-top: 60px; border-top: 1px solid #1a1a1a; color: #666; font-size: 0.85rem; }
+        footer a { color: #00ff88; text-decoration: none; }
+        footer a:hover { text-decoration: underline; }
+        hr { border: none; border-top: 1px solid #1a1a1a; margin: 30px 0; }
+        strong { color: #fff; }
+        .risk-critical { background: rgba(255, 0, 0, 0.3); color: #ff0000; padding: 2px 8px; border-radius: 3px; }
+        .risk-high { background: rgba(255, 68, 68, 0.2); color: #ff4444; padding: 2px 8px; border-radius: 3px; }
+        .risk-medium { background: rgba(255, 193, 7, 0.2); color: #ffc107; padding: 2px 8px; border-radius: 3px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <a href="../index.html" class="back-link">← Back to Reports</a>
+<h1>SquidRouterModule Safe Wallet Vulnerability Investigation Report</h1>
+<p><strong>Investigation Date</strong>: May 26, 2026<br />
+<strong>Event Type</strong>: Safe Wallet Module Vulnerability Exploitation<br />
+<strong>Loss Amount</strong>: $3,200,000<br />
+<strong>Affected Wallets</strong>: 86 Gnosis Safes<br />
+<strong>Attack Chain</strong>: Ethereum + Base  </p>
+<hr />
+<h2>📋 Event Overview</h2>
+<p>On May 26, 2026, blockchain security company Blockaid detected a sustained attack targeting the SquidRouterModule contract. Attackers stole a total of <strong>$3.2 million</strong> in crypto assets from 86 Gnosis Safe wallets within approximately 2 hours.</p>
+<p>Funds were converted to DAI via attacker-controlled Uniswap V3 pools and then consolidated to a single wallet address. PeckShield confirmed the attacker initially received 2.1 ETH from Tornado Cash as seed capital.</p>
+<p><strong>Attacker Wallet</strong>: <code>0xA447...54859</code></p>
+<hr />
+<h2>🔍 Attack Method Analysis</h2>
+<h3>Attack Flow</h3>
+<ol>
+<li><strong>Vulnerability Identification</strong>: Attackers discovered a design flaw in the <code>executeSameChainActions()</code> function of the SquidRouterModule contract</li>
+<li><strong>Authorization Acquisition</strong>: Victim Safe wallets added the malicious contract as a "Trusted Safe Module"</li>
+<li><strong>Privilege Abuse</strong>: This module could control arbitrary tokens in the Safe wallet without signatures</li>
+<li><strong>Exchange &amp; Laundering</strong>: Stolen tokens were swapped via Uniswap V3 for nearly worthless malicious token "u"</li>
+<li><strong>Fund Consolidation</strong>: All valuable assets were ultimately converted to DAI and consolidated to attacker wallet</li>
+</ol>
+<h3>Core Vulnerability</h3>
+<p>According to the official Squid statement:</p>
+<blockquote>
+<p>"The root cause of the vulnerability was a third-party module incorrectly assuming that a publicly visible constant string was sufficient to indicate 'safe'. If you passed in this string (which is publicly available), you could execute arbitrary call data and steal arbitrary funds."</p>
+</blockquote>
+<h3>Victim Behavior</h3>
+<p>Victim Safe wallets added SquidRouterModule as a "Trusted Safe Module." This authorization was intended to allow the contract to execute certain operations on behalf of the Safe, but the contract's design flaw made it exploitable.</p>
+<hr />
+<h2>📊 Fund Flow Analysis</h2>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Asset</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Victim Safe</td>
+<td>Various ERC-20 tokens</td>
+<td>Stolen</td>
+</tr>
+<tr>
+<td>Transit</td>
+<td>Malicious token "u"</td>
+<td>Worthless</td>
+</tr>
+<tr>
+<td>Consolidation</td>
+<td>~$3.07M DAI</td>
+<td>Attacker-controlled</td>
+</tr>
+<tr>
+<td>Initial Capital</td>
+<td>2.1 ETH (Tornado Cash)</td>
+<td>Attacker source</td>
+</tr>
+</tbody>
+</table>
+<p>According to Global Ledger analysis, approximately <strong>$5.86M</strong> remains dispersed in the following wallets unused:
+- <code>0xc3...9100</code>: 1,169.96 ETH (~$2.74M)
+- <code>0x61...2d1c</code>: 1,222.12 ETH (~$2.86M)
+- <code>0x0c...7836</code>: 0.44 ETH (~$1K)
+- <code>bc1q...x0yt</code>: 3.15 BTC (~$257.6K)</p>
+<hr />
+<h2>⚠️ Relationship with Squid Protocol</h2>
+<h3>Official Squid Statement</h3>
+<p>⚠️ <strong>This is NOT a Squid Protocol security incident</strong></p>
+<blockquote>
+<p>"This is a third-party SquidRouterModule being exploited, not our protocol's Router contract."</p>
+<p>"The affected contracts used our name, but not our code."</p>
+</blockquote>
+<h3>Safe Labs Confirmation</h3>
+<p>Safe Labs CEO Rahul Rumalla stated:
+- Preliminary investigation indicates affected accounts were not operated through the official Safe Wallet product
+- The malicious module had previously been flagged by Blockaid and added to the Safe Shield risk detection framework</p>
+<hr />
+<h2>🛡️ Community Protection Recommendations</h2>
+<h3>For Safe Users</h3>
+<ol>
+<li><strong>Module Authorization Caution</strong>: Carefully review any third-party Safe modules</li>
+<li><strong>Verify Contract Source</strong>: Ensure modules come from trusted developers</li>
+<li><strong>Check Module Permissions</strong>: Understand what modules can do once authorized</li>
+<li><strong>Use Safe Shield</strong>: Enable protection provided by security services like Blockaid</li>
+</ol>
+<h3>For Protocol Developers</h3>
+<ol>
+<li><strong>Security Assumptions</strong>: Don't assume publicly visible strings or constants are "proof of safety"</li>
+<li><strong>Principle of Least Privilege</strong>: Grant only necessary permissions</li>
+<li><strong>Security Audits</strong>: Third-party integrations should undergo independent audits</li>
+</ol>
+<hr />
+<h2>📝 Unique Analysis Perspective</h2>
+<h3>Third-Party Module Risks</h3>
+<p>This attack reveals systemic risks of "third-party dependencies" in the DeFi ecosystem:</p>
+<ul>
+<li><strong>Name Confusion</strong>: Malicious contracts use legitimate project names, causing user misjudgment</li>
+<li><strong>Trust Transfer</strong>: Users trust Safe wallet, but modules trusted by Safe may not be trustworthy</li>
+<li><strong>Responsibility Vacuum</strong>: When third-party modules are exploited, responsibility attribution is unclear</li>
+</ul>
+<h3>Gnosis Safe's "Trusted Safe Module" Mechanism</h3>
+<p>Safe wallet's "Trusted Safe Module" mechanism has good intentions:
+- Allows authorized contracts to execute operations on behalf of the wallet
+- Supports automated strategies and cross-chain functionality
+- Improves usability</p>
+<p>But it also brings risks:
+- Module gains full control
+- Once abused, consequences are severe
+- Users have difficulty assessing module security</p>
+<h3>2026 DeFi Attack Patterns</h3>
+<ul>
+<li>April attack losses: $641.67 million</li>
+<li>May to date: $198 million+</li>
+<li>Pattern: Smart contract vulnerabilities giving way to operational key leaks and third-party dependency issues</li>
+</ul>
+<hr />
+<h2>📚 Data Sources</h2>
+<ul>
+<li><a href="https://twitter.com/blockaid_/status">Blockaid Alert</a></li>
+<li><a href="https://twitter.com/PeckShieldAlert/status">PeckShield Alert</a></li>
+<li><a href="https://twitter.com/squidrouter/status">Squid Official Statement</a></li>
+<li><a href="https://blog.globalledger.io/blog/trustedvolumes-hack-2026">Global Ledger Analysis</a></li>
+<li><a href="https://beincrypto.com/squid-disowns-3-2m-squidroutermodule-exploit/">BeInCrypto Report</a></li>
+</ul>
+<hr />
+<p><strong>Investigator</strong>: Onchain Shadow<br />
+<strong>OPSEC Statement</strong>: This report is based on publicly available on-chain data and media reports, all information from public sources.</p>
+    </div>
+    <footer>
+        <p><strong>Onchain Shadow</strong> — Independent On-Chain Investigator</p>
+        <p style="margin-top: 10px;">Reports are for research and educational purposes only.</p>
+    </footer>
+</body>
+</html>
