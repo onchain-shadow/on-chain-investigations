@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Onchain Shadow - DeFi Exploit Investigations</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0a0a0a;
+            color: #e0e0e0;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            padding: 60px 20px;
+            border-bottom: 1px solid #1a1a1a;
+            margin-bottom: 40px;
+        }
+
+        .logo {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #00ff88;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .subtitle {
+            color: #888;
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .tagline {
+            color: #00ff88;
+            font-size: 0.9rem;
+            margin-top: 15px;
+            opacity: 0.8;
+        }
+
+        /* Stats */
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #00ff88;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+        }
+
+        /* Case Cards */
+        .cases-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .case-card {
+            background: linear-gradient(145deg, #111111, #0d0d0d);
+            border: 1px solid #1a1a1a;
+            border-radius: 12px;
+            padding: 25px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .case-card:hover {
+            border-color: #00ff88;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 40px rgba(0, 255, 136, 0.1);
+        }
+
+        .case-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .case-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .case-risk {
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .risk-high {
+            background: rgba(255, 68, 68, 0.2);
+            color: #ff4444;
+            border: 1px solid rgba(255, 68, 68, 0.3);
+        }
+
+        .risk-critical {
+            background: rgba(255, 0, 0, 0.3);
+            color: #ff0000;
+            border: 1px solid rgba(255, 0, 0, 0.5);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .case-description {
+            color: #888;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .case-meta {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .case-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .case-meta-item svg {
+            width: 14px;
+            height: 14px;
+            fill: currentColor;
+        }
+
+        .case-amount {
+            color: #ff4444;
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-top: 10px;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 40px 20px;
+            margin-top: 60px;
+            border-top: 1px solid #1a1a1a;
+            color: #666;
+            font-size: 0.85rem;
+        }
+
+        footer a {
+            color: #00ff88;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .logo {
+                font-size: 1.8rem;
+            }
+
+            .cases-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats {
+                gap: 20px;
+            }
+        }
+
+        /* Section Titles */
+        .section-title {
+            text-align: center;
+            font-size: 1.5rem;
+            color: #fff;
+            margin-bottom: 10px;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">Onchain Shadow</div>
+        <p class="subtitle">On-chain investigator exposing DeFi exploits and crypto scams. Key management is the #1 attack vector in 2026.</p>
+        <p class="tagline">7 Major DeFi Exploits Analyzed | May 2026</p>
+        
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-value">7</div>
+                <div class="stat-label">Investigations</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">$7.5M+</div>
+                <div class="stat-label">Total Losses Analyzed</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">6</div>
+                <div class="stat-label">Chains Covered</div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <h2 class="section-title">Investigation Reports</h2>
+        <p class="section-subtitle">Detailed on-chain analysis of major DeFi security incidents</p>
+
+        <div class="cases-grid">
+            <!-- StablR -->
+            <a href="reports/StablR-Exploit-Investigation-Report-EN.html" class="case-card">
+                <div class="case-header">
+                    <div class="case-title">StablR Stablecoin Hack</div>
+                    <span class="case-risk risk-critical">Critical</span>
+                </div>
+                <p class="case-description">MiCA-compliant stablecoin issuer suffered admin key compromise. Attackers minted $13.5M in unsecured stablecoins through 1-of-3 multisig vulnerability.</p>
+                <div class="case-meta">
+                    <div class="case-meta-item">
+                        <svg viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11zM9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm-8 4H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2z"/></svg>
+                        May 24, 2026
+                    </div>
+                    <div class="case-meta-item">
+                        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+                        Ethereum
+                    </div>
+                </div>
+                <div class="case-amount">~$2.8M - $13.5M</div>
+            </a>
+
+            <!-- Echo Protocol -->
+            <a href="reports/Echo-Protocol-Investigation-Report-EN.html" class="case-card">
+                <div class="case-header">
+                    <div class="case-title">Echo Protocol eBTC</div>
+                    <span class="case-risk risk-high">High</span>
+                </div>
+                <p class="case-description">Admin key attack on Monad's BTCFi protocol. Attacker minted 1,000 fake eBTC (face value $76.7M), cashed out $816K through Tornado Cash.</p>
+                <div class="case-meta">
+                    <div class="case-meta-item">
+                        <svg viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11zM9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm-8 4H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2z"/></svg>
+                        May 18, 2026
+                    </div>
+                    <div class="case-meta-item">
+                        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+                        Monad
+                    </div>
+                </div>
+                <div class="case-amount">~$816K</div>
+            </a>
+
+            <!-- CWU Token -->
+            <a href="reports/CWU-Token-Investigation-Report-EN.html" class="case-card">
+                <div class="case-header">
+                    <div class="case-title">CWU Token Rug Pull</div>
+                    <span class="case-risk risk-critical">Critical</span>
+                </div>
+                <p class="case-description">Classic slow-motion rug pull on Solana. 85% supply controlled by 200+ coordinated wallets. Political endorsement from former Ghana president.</p>
+                <div class="case-meta">
+                    <div class="case-meta-item">
+                        <svg viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11zM9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm-8 4H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2z"/></svg>
+                        May 27, 2026
+                    </div>
+                    <div class="case-meta-item">
+                        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+                        Solana
+                    </div>
+                </div>
+                <div class="case-amount">~$600K+ Dumped</div>
+            </a>
+
+            <!-- WUSD Sybil -->
+            <a href="reports/WUSD-Sybil-Investigation-Report-EN.html" class="case-card">
+                <div class="case-header">
+                    <div class="case-title">WUSD.fi GLOVE Sybil Attack</div>
+                    <span class="case-risk risk-high">High</span>
+                </div>
+                <p class="case-description">First large-scale EIP-7702 attack. Exploited reward mechanism flaw to farm GLOVE tokens, draining Uniswap V3 pools of $207K.</p>
+                <div class="case-meta">
+                    <div class="case-meta-item">
+                        <svg viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11zM9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm-8 4H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2z"/></svg>
+                        May 25, 2026
+                    </div>
+                    <div class="case-meta-item">
+                        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+                        Ethereum
+                    </div>
+                </div>
+                <div class="case-amount">~$207K</div>
+            </a>
+
+            <!-- SquidRouterModule -->
+            <a href="reports/SquidRouterModule-Investigation-Report-EN.html" class="case-card">
+                <div class="case-header">
+                    <div class="case-title">SquidRouterModule Exploit</div>
+                    <span class="case-risk risk-high">High</span>
+                </div>
+                <p class="case-description">Third-party Safe module vulnerability exploited 86 Gnosis Safes. Attackers used design flaw to drain wallets of $3.2M.</p>
+                <div class="case-meta">
+                    <div class="case-meta-item">
+                        <svg viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11zM9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm-8 4H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2z"/></svg>
+                        May 26, 2026
+                    </div>
+                    <div class="case-meta-item">
+                        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+                        Ethereum + Base
+                    </div>
+                </div>
+                <div class="case-amount">$3.2M</div>
+            </a>
+
+            <!-- Fake Uniswap -->
+            <a href="reports/FakeUniswapGoogleAds-Investigation-Report-EN.html" class="case-card">
+                <div class="case-header">
+                    <div class="case-title">Fake Uniswap Google Ads</div>
+                    <span class="case-risk risk-high">High</span>
+                </div>
+                <p class="case-description">Phishing campaign via Google sponsored ads impersonating Uniswap. Used AngelFerno drainer, stolen $400K+ from victims.</p>
+                <div class="case-meta">
+                    <div class="case-meta-item">
+                        <svg viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11zM9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm-8 4H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2z"/></svg>
+                        May 25, 2026
+                    </div>
+                    <div class="case-meta-item">
+                        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+                        Phishing
+                    </div>
+                </div>
+                <div class="case-amount">$400K+</div>
+            </a>
+
+            <!-- Stake DAO -->
+            <a href="reports/StakeDAOVsdCRV-Investigation-Report-EN.html" class="case-card">
+                <div class="case-header">
+                    <div class="case-title">Stake DAO vsdCRV</div>
+                    <span class="case-risk risk-high">High</span>
+                </div>
+                <p class="case-description">Deployer private key leak on Arbitrum. Attacker manipulated LayerZero bridge config to mint 5.4 trillion vsdCRV, profiting $91K.</p>
+                <div class="case-meta">
+                    <div class="case-meta-item">
+                        <svg viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11zM9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm-8 4H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2z"/></svg>
+                        May 27, 2026
+                    </div>
+                    <div class="case-meta-item">
+                        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+                        Arbitrum
+                    </div>
+                </div>
+                <div class="case-amount">~$91K</div>
+            </a>
+        </div>
+    </main>
+
+    <footer>
+        <p><strong>Onchain Shadow</strong> — Independent On-Chain Investigator</p>
+        <p style="margin-top: 10px;">Reports are for research and educational purposes only.</p>
+        <p style="margin-top: 20px;">
+            <a href="https://twitter.com" target="_blank">Twitter/X</a> · 
+            <a href="https://github.com" target="_blank">GitHub</a>
+        </p>
+    </footer>
+</body>
+</html>
