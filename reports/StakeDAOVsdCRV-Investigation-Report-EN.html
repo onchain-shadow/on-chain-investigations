@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stake DAO vsdCRV Attack Investigation Report - Onchain Shadow</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0a0a0a; color: #e0e0e0; line-height: 1.7; }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        header { border-bottom: 1px solid #1a1a1a; padding-bottom: 30px; margin-bottom: 40px; }
+        .back-link { color: #00ff88; text-decoration: none; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 5px; }
+        .back-link:hover { text-decoration: underline; }
+        h1 { color: #fff; font-size: 2rem; margin: 20px 0 10px; }
+        h2 { color: #00ff88; font-size: 1.4rem; margin: 40px 0 20px; padding-top: 20px; border-top: 1px solid #1a1a1a; }
+        h3 { color: #fff; font-size: 1.1rem; margin: 25px 0 15px; }
+        .meta { color: #666; font-size: 0.85rem; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 0.9rem; }
+        th, td { padding: 12px 15px; text-align: left; border: 1px solid #1a1a1a; }
+        th { background: #111; color: #00ff88; }
+        tr:nth-child(even) { background: #0d0d0d; }
+        code { background: #1a1a1a; padding: 2px 6px; border-radius: 3px; font-family: monospace; color: #00ff88; font-size: 0.85rem; }
+        pre { background: #111; padding: 20px; border-radius: 8px; overflow-x: auto; margin: 20px 0; border: 1px solid #1a1a1a; }
+        pre code { background: none; padding: 0; }
+        blockquote { border-left: 3px solid #00ff88; padding-left: 20px; margin: 20px 0; color: #888; font-style: italic; }
+        ul, ol { margin: 15px 0 15px 25px; }
+        li { margin-bottom: 8px; }
+        footer { text-align: center; padding: 40px 20px; margin-top: 60px; border-top: 1px solid #1a1a1a; color: #666; font-size: 0.85rem; }
+        footer a { color: #00ff88; text-decoration: none; }
+        footer a:hover { text-decoration: underline; }
+        hr { border: none; border-top: 1px solid #1a1a1a; margin: 30px 0; }
+        strong { color: #fff; }
+        .risk-critical { background: rgba(255, 0, 0, 0.3); color: #ff0000; padding: 2px 8px; border-radius: 3px; }
+        .risk-high { background: rgba(255, 68, 68, 0.2); color: #ff4444; padding: 2px 8px; border-radius: 3px; }
+        .risk-medium { background: rgba(255, 193, 7, 0.2); color: #ffc107; padding: 2px 8px; border-radius: 3px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <a href="../index.html" class="back-link">← Back to Reports</a>
+<h1>Stake DAO vsdCRV Attack Investigation Report</h1>
+<p><strong>Investigation Date</strong>: May 27, 2026<br />
+<strong>Event Type</strong>: Private Key Leak Leading to Cross-Chain Token Unlimited Minting<br />
+<strong>Loss Amount</strong>: ~$91,000 (Final Profit)<br />
+<strong>Attacked Token</strong>: vsdCRV (Vote-Boosted sdCRV)<br />
+<strong>Attack Chain</strong>: Arbitrum  </p>
+<hr />
+<h2>📋 Event Overview</h2>
+<p>On May 27, 2026, DeFi protocol Stake DAO suffered a security attack. Attackers obtained the protocol's deployer private key on Arbitrum chain, using it to manipulate LayerZero cross-chain bridge configuration, minting <strong>5.4 trillion</strong> vsdCRV tokens, and converting part to 44 ETH (valued ~$91,000), then cross-chaining to Ethereum mainnet.</p>
+<p>Key transaction hashes:
+- Minting transaction: <code>0x7489ec5f5dba1de6e6c92f2c0f1dd93bd4a2f307c3bd2305b2f93f569a3e5fe5</code>
+- LayerZero configuration change transaction</p>
+<hr />
+<h2>🔍 Attack Method Analysis</h2>
+<h3>Attack Flow</h3>
+<ol>
+<li><strong>Private Key Acquisition</strong>: Attackers obtained Stake DAO's Arbitrum deployer private key</li>
+<li><strong>Configuration Manipulation</strong>: Used private key to reset vsdCRV's LayerZero OFT contract peer configuration</li>
+<li><strong>Cross-Chain Message Forgery</strong>: Sent forged cross-chain messages through malicious peer</li>
+<li><strong>Unlimited Minting</strong>: Contract accepted forged messages, unconditionally minting 5.4 trillion vsdCRV</li>
+<li><strong>Rapid Exchange</strong>: Converted tokens to ETH via MetaMask public router</li>
+<li><strong>Cross-Chain Transfer</strong>: Cross-chained ETH to Ethereum mainnet</li>
+</ol>
+<h3>Timeline Analysis</h3>
+<ul>
+<li><strong>T+0 seconds</strong>: Attacker used deployer private key to reset LayerZero peer configuration</li>
+<li><strong>T+25 seconds</strong>: Malicious contract sent cross-chain message via LayerZero</li>
+<li><strong>T+25 seconds</strong>: Contract minted 5.4 trillion vsdCRV to attacker address</li>
+<li><strong>Immediately</strong>: Attacker exchanged tokens for ETH via DEXs like Uniswap</li>
+<li><strong>Subsequently</strong>: Cross-chained ETH to Ethereum mainnet</li>
+</ul>
+<h3>Technical Details</h3>
+<p>According to BlockSec analysis:</p>
+<blockquote>
+<p>"Attackers obtained the deployer private key and set an arbitrary peer for vsdCRV. Using this peer, they sent a malicious message, triggering unconditional minting of approximately 5.44T vsdCRV to the attacker address."</p>
+</blockquote>
+<p>According to Sodot co-founder Shalev Keren:</p>
+<blockquote>
+<p>"No smart contract vulnerability, no LayerZero flaw. Just a private key controlling a privileged configuration function, no multisig, no delay between configuration change and on-chain minting."</p>
+</blockquote>
+<hr />
+<h2>📊 Fund Flow Analysis</h2>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Asset</th>
+<th>Amount</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Minting</td>
+<td>vsdCRV</td>
+<td>5,446,744,073,709</td>
+</tr>
+<tr>
+<td>Exchange</td>
+<td>ETH</td>
+<td>~44 ETH</td>
+</tr>
+<tr>
+<td>Cross-Chain</td>
+<td>ETH (Arbitrum→Ethereum)</td>
+<td>~44 ETH</td>
+</tr>
+</tbody>
+</table>
+<p>Stake DAO officially confirmed attacker address and attack transaction.</p>
+<hr />
+<h2>⚠️ Systemic Risk Analysis</h2>
+<h3>2026 DeFi Security Situation</h3>
+<p>This attack continues the severe security situation in DeFi in 2026:</p>
+<ul>
+<li><strong>April 2026</strong>: DeFi attack losses reached <strong>$641.67 million</strong> (highest monthly record)</li>
+<li><strong>Since April</strong>: Over <strong>$600 million</strong> stolen, including:</li>
+<li>Kelp DAO: $292 million</li>
+<li>Drift Protocol: $285 million</li>
+<li>Wasabi Protocol: $4.5 million</li>
+</ul>
+<h3>Common Pattern</h3>
+<p>Comment from OpenZeppelin founder Manuel Aráoz:</p>
+<blockquote>
+<p>"I think all DeFi is insecure."</p>
+</blockquote>
+<p>There is fundamental asymmetry between attackers and defenders:
+- Attackers only need to find one vulnerability
+- Defenders need to protect all possible attack surfaces</p>
+<h3>"Deployer Key" Risk</h3>
+<p>This attack shares similar patterns with:
+- Wasabi Protocol (April 2026): Deployer private key leak, $4.5 million lost across 4 chains
+- Multiple 2026 DeFi attacks: All involving single point of failure from privileged keys</p>
+<hr />
+<h2>🛡️ Community Protection Recommendations</h2>
+<h3>For Protocol Developers</h3>
+<ol>
+<li><strong>Remove Single Points of Failure</strong>: Avoid using single private keys to control critical configurations</li>
+<li><strong>Implement Timelocks</strong>: Configuration changes should have multisig and delay mechanisms</li>
+<li><strong>Audit Focus</strong>: Include key management and configuration permissions in security audits</li>
+<li><strong>Emergency Pause</strong>: Deploy emergency pause mechanisms to respond to key leaks</li>
+</ol>
+<h3>For Users</h3>
+<ol>
+<li><strong>Monitor Protocol Announcements</strong>: Follow project's security alerts and official statements</li>
+<li><strong>Limit Exposure</strong>: Avoid keeping large amounts of assets in a single protocol long-term</li>
+<li><strong>Pay Attention to Events</strong>: Immediately withdraw affected assets when hearing about security incidents</li>
+</ol>
+<hr />
+<h2>📝 Unique Analysis Perspective</h2>
+<h3>LayerZero Cross-Chain Bridge Structural Vulnerability</h3>
+<p>This attack reveals potential issues in cross-chain bridge design:</p>
+<ul>
+<li><strong>Cross-chain message verification depends on peer configuration</strong>: If peer is maliciously changed, entire verification mechanism fails</li>
+<li><strong>Configuration changes without delay</strong>: Configuration change to fund theft completed within 25 seconds</li>
+<li><strong>Single permission point</strong>: Deployer private key controls critical cross-chain configuration</li>
+</ul>
+<h3>DeFi's "Fake Decentralization" Dilemma</h3>
+<p>Many protocols claim "decentralization," but actual security depends on:
+- One private key (private key leak = protocol hacked)
+- Single deployer (operational risk concentration)
+- Multisig but no delay (barely any actual protection)</p>
+<h3>Industry Reflection</h3>
+<p>This attack should prompt the entire industry to reflect:
+- What are we really protecting?
+- Does "audit passed" equal "secure"?
+- Who should be responsible for private key leaks?</p>
+<hr />
+<h2>📚 Data Sources</h2>
+<ul>
+<li><a href="https://www.theblock.co/post/402719/security-researchers-flag-ongoing-stakedao-exploit-vsdcrv">The Block Report</a></li>
+<li><a href="https://x.com/blockaid_/thread/2059573118927049152">Blockaid Alert</a></li>
+<li><a href="https://x.com/Phalcon_xyz/status/2059582384849506454">BlockSec Analysis</a></li>
+<li><a href="https://x.com/StakeDAOHQ/status/2059586800255910039">Stake DAO Official Statement</a></li>
+<li><a href="https://protos.com/stake-dao-hit-by-hack-as-defi-security-confidence-hits-new-low/">Protos Report</a></li>
+</ul>
+<hr />
+<p><strong>Investigator</strong>: Onchain Shadow<br />
+<strong>OPSEC Statement</strong>: This report is based on publicly available on-chain data and media reports, all information from public sources.</p>
+    </div>
+    <footer>
+        <p><strong>Onchain Shadow</strong> — Independent On-Chain Investigator</p>
+        <p style="margin-top: 10px;">Reports are for research and educational purposes only.</p>
+    </footer>
+</body>
+</html>
